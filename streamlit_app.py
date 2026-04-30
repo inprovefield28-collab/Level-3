@@ -30,7 +30,7 @@ st.markdown(f"""
     .stApp {{ background-color: {COLOR_BG}; }}
     header {{ visibility: hidden; }}
     
-    /* 針對 st.form 進行樣式重寫 (白色卡片) */
+    /* 大卡片容器 (針對 st.form) */
     [data-testid="stForm"] {{
         background-color: white !important;
         padding: 40px !important;
@@ -67,12 +67,18 @@ st.markdown(f"""
         background-color: #F9FAFB !important;
         border: 1px solid #E5E7EB !important;
         border-radius: 10px !important;
+        padding: 12px !important;
     }}
 
-    /* 進入挑戰按鈕區塊：解決寬度與間距問題 */
+    /* 進入挑戰按鈕區塊修復 (關鍵在容器寬度) */
     [data-testid="stFormSubmitButton"] {{
         display: flex !important;
         justify-content: center !important;
+        width: 100% !important;
+    }}
+
+    /* 強制撐開 Streamlit 內部的按鈕封裝 div */
+    div[data-testid="stFormSubmitButton"] > div {{
         width: 100% !important;
     }}
 
@@ -85,16 +91,12 @@ st.markdown(f"""
         padding: 15px !important;
         font-size: 22px !important;
         font-weight: bold !important;
-        margin-top: 30px !important;
+        margin-top: 25px !important;
         margin-bottom: 10px !important;
-    }}
-    
-    /* 強制拉長按鈕容器 */
-    div[data-testid="stFormSubmitButton"] > div {{
-        width: 100% !important;
+        transition: 0.3s;
     }}
 
-    /* 測驗選項按鈕樣式 */
+    /* 測驗選項按鈕 (測驗頁面) */
     .quiz-btn button {{
         width: 100% !important;
         background-color: white !important;
@@ -131,7 +133,7 @@ def load_and_shuffle_data():
     questions = []
     for q in full_df.to_dict('records'):
         opts = [str(q.get('a','')), str(q.get('b','')), str(q.get('c',''))]
-        correct_text = opts[0]
+        correct_text = opts[0] # 原始檔 A 是正確答案
         random.shuffle(opts)
         questions.append({
             'id': str(q.get('id', 0)).zfill(3),
@@ -151,8 +153,11 @@ if st.session_state.step == 'start':
     with st.form("start_form"):
         st.markdown(f'<div class="app-title">{APP_TITLE}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="intro-box">{INTRO_BOX_TEXT}</div>', unsafe_allow_html=True)
+        
         user_name = st.text_input("user_name", label_visibility="collapsed", placeholder="請輸入姓名")
+        
         submit = st.form_submit_button("進入挑戰")
+        
         if submit:
             if user_name.strip() == "":
                 st.error("請輸入姓名後再開始唷！")
@@ -175,6 +180,7 @@ elif st.session_state.step == 'quiz':
     if os.path.exists(q['path']):
         st.audio(q['path'])
     st.write(f"#### {q['q']}")
+    
     st.markdown('<div class="quiz-btn">', unsafe_allow_html=True)
     keys = ['A', 'B', 'C']
     for i, opt_text in enumerate(q['opts']):
@@ -193,7 +199,6 @@ elif st.session_state.step == 'quiz':
 
 # C. 結果頁
 elif st.session_state.step == 'result':
-    # 結果頁使用 main-card 樣式
     st.markdown(f"""
     <div style="background-color: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 10px solid {COLOR_MAIN}; max-width: 600px; margin: 20px auto;">
         <h2 style='text-align:center;'>🏆 練習結束！</h2>
@@ -208,7 +213,8 @@ elif st.session_state.step == 'result':
         if not item['is_correct']:
             wrong_txt += f"Q{i+1}: {item['question']}\\n   ❌ 您選: {item['user_choice']}\\n   ✅ 正確: {item['correct_answer']}\\n\\n"
     
-    report_text = f"【{APP_TITLE}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
+    level_tag = st.session_state.quiz_data[0]['level_info']
+    report_text = f"【{level_tag}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
 
     html_code = f"""
         <button id="copyBtn" style="background-color:{COLOR_MAIN}; color:white; border:none; padding:15px; font-size:20px; font-weight:bold; border-radius:15px; width:100%; cursor:pointer;">
@@ -225,6 +231,7 @@ elif st.session_state.step == 'result':
         </script>
     """
     st.components.v1.html(html_code, height=100)
+
     st.write("---")
     for i, item in enumerate(st.session_state.results):
         if not item['is_correct']:
