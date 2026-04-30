@@ -69,9 +69,15 @@ st.markdown(f"""
         border-radius: 10px !important;
     }}
 
-/* 進入挑戰按鈕：強制寬度與增加間距 */
-    [data-testid="stFormSubmitButton"] button {{
-        width: 100% !important;        /* 關鍵：拉長到 100% 寬度 */
+/* 進入挑戰按鈕區塊修復 */
+    [data-testid="stFormSubmitButton"] {
+        display: flex;
+        justify-content: center;
+        width: 100% !important;
+    }
+
+    [data-testid="stFormSubmitButton"] button {
+        width: 100% !important;        /* 拉長按鈕 */
         background-color: {COLOR_MAIN} !important;
         color: white !important;
         border: none !important;
@@ -79,9 +85,14 @@ st.markdown(f"""
         padding: 15px !important;
         font-size: 22px !important;
         font-weight: bold !important;
-        margin-top: 25px !important;   /* 關鍵：增加與姓名輸入框的距離，達到等距感 */
-        margin-bottom: 10px !important; /* 確保按鈕下方不會貼齊 Box 底邊 */
-    }}
+        margin-top: 30px !important;   /* 增加間距 */
+        margin-bottom: 10px !important;
+    }
+    
+    /* 強制覆蓋 Streamlit 預設的按鈕容器寬度限制 */
+    .st-emotion-cache-19rxjzo {
+        width: 100% !important;
+    }
 
     /* 測驗選項按鈕 (非 form 內元件) */
     .quiz-btn button {{
