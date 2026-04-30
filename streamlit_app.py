@@ -8,9 +8,7 @@ import random
 # 老師修改區
 # ==========================================
 APP_TITLE = "線上聽力測驗 Level 3"
-INTRO_BOX_TEXT = """
-• 小學三年級+小學四年級單字、句型
-"""
+INTRO_BOX_TEXT = """• 小學三年級+小學四年級單字、句型"""
 
 COLOR_MAIN = "#8B5CF6"   # 主色
 COLOR_LIGHT = "#F5F3FF"  # 說明框背景
@@ -25,66 +23,71 @@ st.markdown(f"""
     .stApp {{ background-color: {COLOR_BG}; }}
     header {{ visibility: hidden; }}
     
+    /* 縮減網頁最上方留白 */
+    .block-container {{
+        padding-top: 1rem !important;
+    }}
+
     /* 大卡片容器 (針對 st.form) */
     [data-testid="stForm"] {{
         background-color: white !important;
-        padding: 40px !important;
+        padding: 30px 40px !important;
         border-radius: 20px !important;
         box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;
         border: none !important;
         border-top: 10px solid {COLOR_MAIN} !important;
         max-width: 600px;
-        margin: 20px auto;
+        margin: 0px auto;
     }}
     
     .app-title {{
         color: {COLOR_MAIN};
         font-weight: 800;
-        font-size: 36px;
-        margin-bottom: 30px;
+        font-size: 32px;
+        margin-top: -10px; /* 標題上移 */
+        margin-bottom: 10px;
         text-align: center;
     }}
     
     .intro-box {{
         background-color: {COLOR_LIGHT};
-        padding: 25px;  /* 文字和淺紫色上框距離 */
+        padding: 12px 25px !important; /* 縮減說明框內部的上下距離 */
         border-radius: 12px;
         color: {COLOR_MAIN};
         font-size: 15px;
-        line-height: 1.8;
-        margin-bottom: 30px;
+        line-height: 1.4;
+        margin-bottom: 20px;
         white-space: pre-wrap;
         text-align: left;
     }}
 
-    /* 輸入框外觀 */
     .stTextInput input {{
         background-color: #F9FAFB !important;
         border: 1px solid #E5E7EB !important;
         border-radius: 10px !important;
-        padding: 12px !important;
     }}
 
-    /* 進入挑戰按鈕：改為置中排版 */
+    /* 進入挑戰按鈕置中 */
     [data-testid="stFormSubmitButton"] {{
         display: flex !important;
-        justify-content: center !important; /* 確保按鈕水平置中 */
+        justify-content: center !important;
         width: 100% !important;
-        margin-top: 25px !important;
     }}
 
     [data-testid="stFormSubmitButton"] button {{
+        width: auto !important;
+        min-width: 150px !important;
         background-color: {COLOR_MAIN} !important;
         color: white !important;
         border: none !important;
         border-radius: 12px !important;
-        padding: 12px 40px !important; /* 調整內距讓按鈕看起來比例自然 */
-        font-size: 20px !important;
+        padding: 10px 40px !important;
+        font-size: 18px !important;
         font-weight: bold !important;
-        transition: 0.3s;
+        margin-top: 10px !important;
     }}
 
-    /* 測驗選項按鈕樣式 */
+    /* 測驗選項按鈕 */
     .quiz-btn button {{
         width: 100% !important;
         background-color: white !important;
@@ -125,7 +128,7 @@ def load_and_shuffle_data():
         random.shuffle(opts)
         questions.append({
             'id': str(q.get('id', 0)).zfill(3),
-            'q': q.get('question', ''),
+            'q': q.get('question', ''), # 資料仍保留供結果頁面使用
             'opts': opts,
             'ans': opts.index(correct_text),
             'path': f"audio_{q['cat']}{q['rng']}/q_{str(q.get('id', 0)).zfill(3)}.mp3",
@@ -158,13 +161,18 @@ if st.session_state.step == 'start':
                     st.session_state.step = 'quiz'
                     st.rerun()
 
-# B. 測驗頁
+# B. 測驗頁 (已刪除題目文字顯示)
 elif st.session_state.step == 'quiz':
     q = st.session_state.quiz_data[st.session_state.current_idx]
     st.markdown(f"### 第 {st.session_state.current_idx + 1} / 10 題")
+    
     if os.path.exists(q['path']):
         st.audio(q['path'])
-    st.write(f"#### {q['q']}")
+    else:
+        st.warning(f"找不到音檔: {q['path']}")
+    
+    # 此處已刪除 st.write(f"#### {q['q']}")
+    
     st.markdown('<div class="quiz-btn">', unsafe_allow_html=True)
     keys = ['A', 'B', 'C']
     for i, opt_text in enumerate(q['opts']):
