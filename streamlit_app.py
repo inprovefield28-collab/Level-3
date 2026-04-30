@@ -24,13 +24,13 @@ COLOR_BG = "#F8F9FD"     # 網頁底色
 
 st.set_page_config(page_title=APP_TITLE, layout="centered")
 
-# --- 1. 樣式注入 (核心：將 st.form 偽裝成您的白色卡片) ---
+# --- 1. 樣式注入 ---
 st.markdown(f"""
     <style>
     .stApp {{ background-color: {COLOR_BG}; }}
     header {{ visibility: hidden; }}
     
-    /* 針對 st.form 進行樣式重寫 */
+    /* 針對 st.form 進行樣式重寫 (白色卡片) */
     [data-testid="stForm"] {{
         background-color: white !important;
         padding: 40px !important;
@@ -69,15 +69,15 @@ st.markdown(f"""
         border-radius: 10px !important;
     }}
 
-/* 進入挑戰按鈕區塊修復 */
-    [data-testid="stFormSubmitButton"] {
-        display: flex;
-        justify-content: center;
+    /* 進入挑戰按鈕區塊：解決寬度與間距問題 */
+    [data-testid="stFormSubmitButton"] {{
+        display: flex !important;
+        justify-content: center !important;
         width: 100% !important;
-    }
+    }}
 
-    [data-testid="stFormSubmitButton"] button {
-        width: 100% !important;        /* 拉長按鈕 */
+    [data-testid="stFormSubmitButton"] button {{
+        width: 100% !important;
         background-color: {COLOR_MAIN} !important;
         color: white !important;
         border: none !important;
@@ -85,16 +85,16 @@ st.markdown(f"""
         padding: 15px !important;
         font-size: 22px !important;
         font-weight: bold !important;
-        margin-top: 30px !important;   /* 增加間距 */
+        margin-top: 30px !important;
         margin-bottom: 10px !important;
-    }
+    }}
     
-    /* 強制覆蓋 Streamlit 預設的按鈕容器寬度限制 */
-    .st-emotion-cache-19rxjzo {
+    /* 強制拉長按鈕容器 */
+    div[data-testid="stFormSubmitButton"] > div {{
         width: 100% !important;
-    }
+    }}
 
-    /* 測驗選項按鈕 (非 form 內元件) */
+    /* 測驗選項按鈕樣式 */
     .quiz-btn button {{
         width: 100% !important;
         background-color: white !important;
@@ -103,6 +103,7 @@ st.markdown(f"""
         text-align: left !important;
         border-radius: 12px !important;
         padding: 15px !important;
+        margin-bottom: 10px !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -147,15 +148,11 @@ if 'step' not in st.session_state:
 
 # A. 首頁
 if st.session_state.step == 'start':
-    # 使用 st.form 確保所有元件被包在同一個 div 結構中
     with st.form("start_form"):
         st.markdown(f'<div class="app-title">{APP_TITLE}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="intro-box">{INTRO_BOX_TEXT}</div>', unsafe_allow_html=True)
-        
         user_name = st.text_input("user_name", label_visibility="collapsed", placeholder="請輸入姓名")
-        
         submit = st.form_submit_button("進入挑戰")
-        
         if submit:
             if user_name.strip() == "":
                 st.error("請輸入姓名後再開始唷！")
@@ -178,7 +175,6 @@ elif st.session_state.step == 'quiz':
     if os.path.exists(q['path']):
         st.audio(q['path'])
     st.write(f"#### {q['q']}")
-    
     st.markdown('<div class="quiz-btn">', unsafe_allow_html=True)
     keys = ['A', 'B', 'C']
     for i, opt_text in enumerate(q['opts']):
@@ -197,8 +193,12 @@ elif st.session_state.step == 'quiz':
 
 # C. 結果頁
 elif st.session_state.step == 'result':
-    st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    st.markdown(f"<h2 style='text-align:center;'>🏆 練習結束！</h2>", unsafe_allow_html=True)
+    # 結果頁使用 main-card 樣式
+    st.markdown(f"""
+    <div style="background-color: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 10px solid {COLOR_MAIN}; max-width: 600px; margin: 20px auto;">
+        <h2 style='text-align:center;'>🏆 練習結束！</h2>
+    """, unsafe_allow_html=True)
+    
     score = sum(1 for item in st.session_state.results if item['is_correct'])
     final_score = score * 10
     st.markdown(f"<h3 style='text-align:center; color:{COLOR_MAIN};'>得分：{final_score} 分</h3>", unsafe_allow_html=True)
@@ -208,7 +208,6 @@ elif st.session_state.step == 'result':
         if not item['is_correct']:
             wrong_txt += f"Q{i+1}: {item['question']}\\n   ❌ 您選: {item['user_choice']}\\n   ✅ 正確: {item['correct_answer']}\\n\\n"
     
-    level_tag = st.session_state.quiz_data[0]['level_info']
     report_text = f"【{APP_TITLE}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
 
     html_code = f"""
@@ -226,7 +225,6 @@ elif st.session_state.step == 'result':
         </script>
     """
     st.components.v1.html(html_code, height=100)
-
     st.write("---")
     for i, item in enumerate(st.session_state.results):
         if not item['is_correct']:
