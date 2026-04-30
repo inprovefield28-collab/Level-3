@@ -47,7 +47,7 @@ st.markdown(f"""
     
     .intro-box {{
         background-color: {COLOR_LIGHT};
-        padding: 5px;  /* 文字和淺紫色上框距離 */
+        padding: 18px;  /* 文字和淺紫色上框距離 */
         border-radius: 12px;
         color: {COLOR_MAIN};
         font-size: 15px;
