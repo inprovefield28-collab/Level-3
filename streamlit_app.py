@@ -24,22 +24,22 @@ COLOR_BG = "#F8F9FD"     # 網頁底色
 
 st.set_page_config(page_title=APP_TITLE, layout="centered")
 
-# --- 1. 樣式注入 ---
+# --- 1. 樣式注入 (核心：將 st.form 偽裝成您的白色卡片) ---
 st.markdown(f"""
     <style>
     .stApp {{ background-color: {COLOR_BG}; }}
     header {{ visibility: hidden; }}
     
-    /* 大卡片容器 */
-    .main-card {{
-        background-color: white;
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        border-top: 10px solid {COLOR_MAIN};
+    /* 針對 st.form 進行樣式重寫 */
+    [data-testid="stForm"] {{
+        background-color: white !important;
+        padding: 40px !important;
+        border-radius: 20px !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;
+        border: none !important;
+        border-top: 10px solid {COLOR_MAIN} !important;
         max-width: 600px;
         margin: 20px auto;
-        text-align: center;
     }}
     
     .app-title {{
@@ -47,6 +47,7 @@ st.markdown(f"""
         font-weight: 800;
         font-size: 36px;
         margin-bottom: 30px;
+        text-align: center;
     }}
     
     .intro-box {{
@@ -61,7 +62,26 @@ st.markdown(f"""
         text-align: left;
     }}
 
-    /* 選項按鈕樣式 (測驗頁面) */
+    /* 輸入框外觀 */
+    .stTextInput input {{
+        background-color: #F9FAFB !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 10px !important;
+    }}
+
+    /* 按鈕樣式 (進入挑戰) */
+    [data-testid="stFormSubmitButton"] button {{
+        width: 100% !important;
+        background-color: {COLOR_MAIN} !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 15px !important;
+        font-size: 22px !important;
+        font-weight: bold !important;
+    }}
+
+    /* 測驗選項按鈕 (非 form 內元件) */
     .quiz-btn button {{
         width: 100% !important;
         background-color: white !important;
@@ -70,11 +90,6 @@ st.markdown(f"""
         text-align: left !important;
         border-radius: 12px !important;
         padding: 15px !important;
-        margin-bottom: 10px !important;
-    }}
-    .quiz-btn button:hover {{
-        border-color: {COLOR_MAIN} !important;
-        background-color: {COLOR_LIGHT} !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -117,40 +132,31 @@ def load_and_shuffle_data():
 if 'step' not in st.session_state:
     st.session_state.step = 'start'
 
-# A. 首頁 - 使用單一 HTML Component 確保所有元件都在 Box 內
+# A. 首頁
 if st.session_state.step == 'start':
-    # 使用單純的 HTML 來模擬輸入框和按鈕，確保它們都在白色卡片內
-    st.markdown(f"""
-        <div class="main-card">
-            <div class="app-title">{APP_TITLE}</div>
-            <div class="intro-box">{INTRO_BOX_TEXT}</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-    # 這裡使用一個稍微負數的 margin-top 將按鈕和輸入框「拉進」上方的 main-card 範圍
-    # 這是 Streamlit 佈局中最穩定的做法
-    container = st.container()
-    with container:
-        # 使用 columns 將寬度限制在卡片範圍內
-        c1, c2, c3 = st.columns([1, 8, 1])
-        with c2:
-            st.markdown('<div style="margin-top: -100px; padding-bottom: 60px;">', unsafe_allow_html=True)
-            user_name = st.text_input("user_name", label_visibility="collapsed", placeholder="請輸入姓名")
-            if st.button("進入挑戰"):
-                if user_name.strip() == "":
-                    st.error("請輸入姓名後再開始唷！")
+    # 使用 st.form 確保所有元件被包在同一個 div 結構中
+    with st.form("start_form"):
+        st.markdown(f'<div class="app-title">{APP_TITLE}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="intro-box">{INTRO_BOX_TEXT}</div>', unsafe_allow_html=True)
+        
+        user_name = st.text_input("user_name", label_visibility="collapsed", placeholder="請輸入姓名")
+        
+        submit = st.form_submit_button("進入挑戰")
+        
+        if submit:
+            if user_name.strip() == "":
+                st.error("請輸入姓名後再開始唷！")
+            else:
+                st.session_state.user_name = user_name
+                st.session_state.all_pool = load_and_shuffle_data()
+                if not st.session_state.all_pool:
+                    st.error("找不到題庫檔案 (CSV)")
                 else:
-                    st.session_state.user_name = user_name
-                    st.session_state.all_pool = load_and_shuffle_data()
-                    if not st.session_state.all_pool:
-                        st.error("找不到題庫檔案 (CSV)")
-                    else:
-                        st.session_state.quiz_data = random.sample(st.session_state.all_pool, min(len(st.session_state.all_pool), 10))
-                        st.session_state.current_idx = 0
-                        st.session_state.results = []
-                        st.session_state.step = 'quiz'
-                        st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+                    st.session_state.quiz_data = random.sample(st.session_state.all_pool, min(len(st.session_state.all_pool), 10))
+                    st.session_state.current_idx = 0
+                    st.session_state.results = []
+                    st.session_state.step = 'quiz'
+                    st.rerun()
 
 # B. 測驗頁
 elif st.session_state.step == 'quiz':
