@@ -69,17 +69,22 @@ st.markdown(f"""
         border-radius: 10px !important;
     }}
 
-    /* 按鈕樣式 (進入挑戰) */
-    [data-testid="stFormSubmitButton"] button {{
-        width: 100% !important;
-        background-color: {COLOR_MAIN} !important;
+/* 按鈕樣式 (進入挑戰) - 確保與上方框等寬且間距一致 */
+    [data-testid="stFormSubmitButton"] {
+        text-align: center;
+    }
+
+    [data-testid="stFormSubmitButton"] button {
+        width: 100% !important; /* 拉長至 100% 寬度以參照上方框 */
+        background-color: #8B5CF6 !important;
         color: white !important;
         border: none !important;
         border-radius: 12px !important;
         padding: 15px !important;
         font-size: 22px !important;
         font-weight: bold !important;
-    }}
+        margin-top: 20px !important; /* 調整與輸入框的等距感 */
+    }
 
     /* 測驗選項按鈕 (非 form 內元件) */
     .quiz-btn button {{
