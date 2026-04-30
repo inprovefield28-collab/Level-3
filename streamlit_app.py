@@ -70,14 +70,14 @@ st.markdown(f"""
         padding: 12px !important;
     }}
 
-    /* 進入挑戰按鈕區塊修復 (關鍵在容器寬度) */
+    /* 進入挑戰按鈕區塊修復 (關鍵在容器寬度與外層對齊) */
     [data-testid="stFormSubmitButton"] {{
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
     }}
 
-    /* 強制撐開 Streamlit 內部的按鈕封裝 div */
+    /* 強制撐開 Streamlit 內部的按鈕封裝 div，避免按鈕縮短 */
     div[data-testid="stFormSubmitButton"] > div {{
         width: 100% !important;
     }}
@@ -133,7 +133,7 @@ def load_and_shuffle_data():
     questions = []
     for q in full_df.to_dict('records'):
         opts = [str(q.get('a','')), str(q.get('b','')), str(q.get('c',''))]
-        correct_text = opts[0] # 原始檔 A 是正確答案
+        correct_text = opts[0]
         random.shuffle(opts)
         questions.append({
             'id': str(q.get('id', 0)).zfill(3),
