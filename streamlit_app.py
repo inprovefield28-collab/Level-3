@@ -70,33 +70,26 @@ st.markdown(f"""
         padding: 12px !important;
     }}
 
-    /* 進入挑戰按鈕區塊修復 (關鍵在容器寬度與外層對齊) */
+    /* 進入挑戰按鈕：改為置中排版 */
     [data-testid="stFormSubmitButton"] {{
         display: flex !important;
-        justify-content: center !important;
+        justify-content: center !important; /* 確保按鈕水平置中 */
         width: 100% !important;
-    }}
-
-    /* 強制撐開 Streamlit 內部的按鈕封裝 div，避免按鈕縮短 */
-    div[data-testid="stFormSubmitButton"] > div {{
-        width: 100% !important;
+        margin-top: 25px !important;
     }}
 
     [data-testid="stFormSubmitButton"] button {{
-        width: 100% !important;
         background-color: {COLOR_MAIN} !important;
         color: white !important;
         border: none !important;
         border-radius: 12px !important;
-        padding: 15px !important;
-        font-size: 22px !important;
+        padding: 12px 40px !important; /* 調整內距讓按鈕看起來比例自然 */
+        font-size: 20px !important;
         font-weight: bold !important;
-        margin-top: 25px !important;
-        margin-bottom: 10px !important;
         transition: 0.3s;
     }}
 
-    /* 測驗選項按鈕 (測驗頁面) */
+    /* 測驗選項按鈕樣式 */
     .quiz-btn button {{
         width: 100% !important;
         background-color: white !important;
@@ -153,11 +146,8 @@ if st.session_state.step == 'start':
     with st.form("start_form"):
         st.markdown(f'<div class="app-title">{APP_TITLE}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="intro-box">{INTRO_BOX_TEXT}</div>', unsafe_allow_html=True)
-        
         user_name = st.text_input("user_name", label_visibility="collapsed", placeholder="請輸入姓名")
-        
         submit = st.form_submit_button("進入挑戰")
-        
         if submit:
             if user_name.strip() == "":
                 st.error("請輸入姓名後再開始唷！")
@@ -180,7 +170,6 @@ elif st.session_state.step == 'quiz':
     if os.path.exists(q['path']):
         st.audio(q['path'])
     st.write(f"#### {q['q']}")
-    
     st.markdown('<div class="quiz-btn">', unsafe_allow_html=True)
     keys = ['A', 'B', 'C']
     for i, opt_text in enumerate(q['opts']):
@@ -214,7 +203,7 @@ elif st.session_state.step == 'result':
             wrong_txt += f"Q{i+1}: {item['question']}\\n   ❌ 您選: {item['user_choice']}\\n   ✅ 正確: {item['correct_answer']}\\n\\n"
     
     level_tag = st.session_state.quiz_data[0]['level_info']
-    report_text = f"【{level_tag}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
+    report_text = f"【{APP_TITLE}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
 
     html_code = f"""
         <button id="copyBtn" style="background-color:{COLOR_MAIN}; color:white; border:none; padding:15px; font-size:20px; font-weight:bold; border-radius:15px; width:100%; cursor:pointer;">
@@ -231,7 +220,6 @@ elif st.session_state.step == 'result':
         </script>
     """
     st.components.v1.html(html_code, height=100)
-
     st.write("---")
     for i, item in enumerate(st.session_state.results):
         if not item['is_correct']:
