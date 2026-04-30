@@ -97,7 +97,7 @@ width: 100% !important;
         border-radius: 12px !important;
         padding: 15px !important;
         margin-bottom: 10px !important;
-        font-size: 24px !important; /* 直接加入這一行，數字可改 22-26 */
+        font-size: 26px !important; /* 直接加入這一行，數字可改 22-26 */
     }}
     </style>
 """, unsafe_allow_html=True)
