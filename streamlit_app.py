@@ -7,9 +7,9 @@ import random
 # ==========================================
 # 老師修改區：在此直接修改文字與設定
 # ==========================================
-APP_TITLE = "線上練習 Level 3"
+APP_TITLE = "文法句型快樂學習"
+# 已刪除 APP_SUBTITLE
 
-# --- 修改區：建議這樣撰寫以確保換行清晰 ---
 INTRO_BOX_TEXT = """
 **本次優化重點：**
 
@@ -19,26 +19,18 @@ INTRO_BOX_TEXT = """
 • 格式標準：句首大寫、專有名詞保護
 """
 
-# 主題顏色 (比照圖片紫色系)
 COLOR_MAIN = "#8B5CF6"   # 主色
-COLOR_LIGHT = "#F5F3FF"  # 說明框淡紫色背景
+COLOR_LIGHT = "#F5F3FF"  # 說明框背景
 COLOR_BG = "#F8F9FD"     # 網頁底色
 # ==========================================
 
-# --- 1. 樣式注入 (完全還原圖片視覺) ---
+# --- 1. 樣式注入 ---
 st.set_page_config(page_title=APP_TITLE, layout="centered")
 
 st.markdown(f"""
     <style>
-    /* 全域背景 */
-    .stApp {{
-        background-color: {COLOR_BG};
-    }}
-    
-    /* 隱藏上方頂欄與選單 */
+    .stApp {{ background-color: {COLOR_BG}; }}
     header {{visibility: hidden;}}
-    
-    /* 卡片式容器 */
     .main-card {{
         background-color: white;
         padding: 40px;
@@ -47,23 +39,13 @@ st.markdown(f"""
         border-top: 8px solid {COLOR_MAIN};
         margin-top: 20px;
     }}
-    
-    /* 標題樣式 */
     .app-title {{
         color: {COLOR_MAIN};
         text-align: center;
         font-weight: 800;
         font-size: 32px;
-        margin-bottom: 5px;
+        margin-bottom: 30px; /* 增加間距，因為沒有副標題了 */
     }}
-    .app-subtitle {{
-        color: #6B7280;
-        text-align: center;
-        font-size: 16px;
-        margin-bottom: 30px;
-    }}
-    
-    /* 說明小框 */
     .intro-box {{
         background-color: {COLOR_LIGHT};
         padding: 20px;
@@ -72,17 +54,9 @@ st.markdown(f"""
         font-size: 15px;
         line-height: 1.6;
         margin-bottom: 30px;
+        white-space: pre-wrap;
     }}
-    
-    /* 輸入框標籤 */
-    .input-label {{
-        font-weight: bold;
-        font-size: 18px;
-        color: #374151;
-        margin-bottom: 10px;
-    }}
-    
-    /* 按鈕樣式 (進入挑戰) */
+    .input-label {{ font-weight: bold; font-size: 18px; color: #374151; margin-bottom: 10px; }}
     div.stButton > button {{
         width: 100% !important;
         background-color: {COLOR_MAIN} !important;
@@ -92,31 +66,17 @@ st.markdown(f"""
         padding: 18px !important;
         font-size: 22px !important;
         font-weight: bold !important;
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-        transition: 0.3s;
     }}
-    div.stButton > button:hover {{
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4) !important;
-    }}
-
-    /* 選項按鈕樣式 (測驗中) */
     .quiz-btn button {{
         background-color: white !important;
         color: #333 !important;
         border: 2px solid #F3F4F6 !important;
-        box-shadow: none !important;
         text-align: left !important;
-        justify-content: flex-start !important;
-    }}
-    .quiz-btn button:hover {{
-        border-color: {COLOR_MAIN} !important;
-        background-color: {COLOR_LIGHT} !important;
     }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. 資料讀取 (維持全 A 原始檔邏輯) ---
+# --- 2. 資料讀取 ---
 @st.cache_data
 def load_and_shuffle_data():
     df_list = []
@@ -139,7 +99,7 @@ def load_and_shuffle_data():
     questions = []
     for q in full_df.to_dict('records'):
         opts = [str(q.get('a','')), str(q.get('b','')), str(q.get('c',''))]
-        correct_text = opts[0] # 原始檔 A 是正確答案
+        correct_text = opts[0]
         random.shuffle(opts)
         questions.append({
             'id': str(q.get('id', 0)).zfill(3),
@@ -155,18 +115,17 @@ def load_and_shuffle_data():
 if 'step' not in st.session_state:
     st.session_state.step = 'start'
 
-# A. 首頁 (還原 image_2885a8.png)
+# A. 首頁
 if st.session_state.step == 'start':
     st.markdown('<div class="main-card">', unsafe_allow_html=True)
     st.markdown(f'<div class="app-title">{APP_TITLE}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="app-subtitle">{APP_SUBTITLE}</div>', unsafe_allow_html=True)
-    
+    # 此處已移除副標題的呼叫
     st.markdown(f'<div class="intro-box">{INTRO_BOX_TEXT}</div>', unsafe_allow_html=True)
-    
     st.markdown('<div class="input-label">請輸入姓名：</div>', unsafe_allow_html=True)
+    
     user_name = st.text_input("user_name_input", label_visibility="collapsed", placeholder="請輸入姓名")
     
-    st.write("##") # 留空隙
+    st.write("##")
     if st.button("進入挑戰"):
         if user_name.strip() == "":
             st.error("請輸入姓名後再開始唷！")
@@ -186,12 +145,9 @@ if st.session_state.step == 'start':
 # B. 測驗頁
 elif st.session_state.step == 'quiz':
     q = st.session_state.quiz_data[st.session_state.current_idx]
-    
     st.markdown(f"### 第 {st.session_state.current_idx + 1} / 10 題")
-    
     if os.path.exists(q['path']):
         st.audio(q['path'])
-    
     st.write(f"#### {q['q']}")
     
     st.markdown('<div class="quiz-btn">', unsafe_allow_html=True)
@@ -210,7 +166,7 @@ elif st.session_state.step == 'quiz':
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# C. 結果頁 (依照要求顯示錯題與複製姓名)
+# C. 結果頁
 elif st.session_state.step == 'result':
     st.markdown('<div class="main-card">', unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align:center;'>🏆 練習結束！</h2>", unsafe_allow_html=True)
@@ -218,15 +174,14 @@ elif st.session_state.step == 'result':
     final_score = score * 10
     st.markdown(f"<h3 style='text-align:center; color:{COLOR_MAIN};'>得分：{final_score} 分</h3>", unsafe_allow_html=True)
 
-    # 製作複製文字 (僅顯示錯題)
     wrong_txt = ""
     for i, item in enumerate(st.session_state.results):
         if not item['is_correct']:
             wrong_txt += f"Q{i+1}: {item['question']}\\n   ❌ 您選: {item['user_choice']}\\n   ✅ 正確: {item['correct_answer']}\\n\\n"
     
-    # 這裡的 Level 會抓取第一題的分類資訊
     level_tag = st.session_state.quiz_data[0]['level_info']
-    report_text = f"【{level_tag}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
+    # 複製成績單標題改用大標題
+    report_text = f"【{APP_TITLE}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
 
     html_code = f"""
         <button id="copyBtn" style="background-color:{COLOR_MAIN}; color:white; border:none; padding:15px; font-size:20px; font-weight:bold; border-radius:15px; width:100%; cursor:pointer;">
@@ -245,7 +200,6 @@ elif st.session_state.step == 'result':
     st.components.v1.html(html_code, height=100)
 
     st.write("---")
-    st.write("🔍 錯題檢視：")
     for i, item in enumerate(st.session_state.results):
         if not item['is_correct']:
             st.error(f"**Q{i+1}: {item['question']}**\n\n❌ 您選: {item['user_choice']}  \n✅ 正確: {item['correct_answer']}")
