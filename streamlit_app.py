@@ -89,7 +89,7 @@ st.markdown(f"""
 
     /* 測驗選項按鈕 */
     .quiz-btn button {{
-        width: 100% !important;
+width: 100% !important;
         background-color: white !important;
         color: #333 !important;
         border: 2px solid #F3F4F6 !important;
@@ -97,6 +97,7 @@ st.markdown(f"""
         border-radius: 12px !important;
         padding: 15px !important;
         margin-bottom: 10px !important;
+        font-size: 24px !important; /* 直接加入這一行，數字可改 22-26 */
     }}
     </style>
 """, unsafe_allow_html=True)
