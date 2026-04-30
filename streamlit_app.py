@@ -47,7 +47,7 @@ st.markdown(f"""
     
     .intro-box {{
         background-color: {COLOR_LIGHT};
-        padding: 25px;
+        padding: 15px;
         border-radius: 12px;
         color: {COLOR_MAIN};
         font-size: 15px;
