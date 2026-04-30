@@ -5,11 +5,9 @@ import re
 import random
 
 # ==========================================
-# 老師修改區：在此直接修改文字與設定
+# 老師修改區
 # ==========================================
 APP_TITLE = "文法句型快樂學習"
-# 已刪除 APP_SUBTITLE
-
 INTRO_BOX_TEXT = """
 **本次優化重點：**
 
@@ -24,59 +22,86 @@ COLOR_LIGHT = "#F5F3FF"  # 說明框背景
 COLOR_BG = "#F8F9FD"     # 網頁底色
 # ==========================================
 
-# --- 1. 樣式注入 ---
 st.set_page_config(page_title=APP_TITLE, layout="centered")
 
+# --- 1. 樣式注入 ---
 st.markdown(f"""
     <style>
     .stApp {{ background-color: {COLOR_BG}; }}
     header {{visibility: hidden;}}
+    
+    /* 大卡片容器 - 包含標題在內 */
     .main-card {{
         background-color: white;
         padding: 40px;
         border-radius: 20px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        border-top: 8px solid {COLOR_MAIN};
+        border-top: 10px solid {COLOR_MAIN};
         margin-top: 20px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }}
+    
+    /* 標題置於卡片內 */
     .app-title {{
         color: {COLOR_MAIN};
         text-align: center;
         font-weight: 800;
-        font-size: 32px;
-        margin-bottom: 30px; /* 增加間距，因為沒有副標題了 */
+        font-size: 36px;
+        margin-bottom: 30px;
     }}
+    
+    /* 說明小框 */
     .intro-box {{
         background-color: {COLOR_LIGHT};
-        padding: 20px;
+        padding: 25px;
         border-radius: 12px;
         color: {COLOR_MAIN};
         font-size: 15px;
-        line-height: 1.6;
+        line-height: 1.8;
         margin-bottom: 30px;
         white-space: pre-wrap;
     }}
-    .input-label {{ font-weight: bold; font-size: 18px; color: #374151; margin-bottom: 10px; }}
+    
+    .input-label {{ 
+        font-weight: bold; 
+        font-size: 18px; 
+        color: #374151; 
+        margin-bottom: 12px; 
+    }}
+    
+    /* 輸入框外觀微調 */
+    .stTextInput > div > div > input {{
+        background-color: #F9FAFB !important;
+        border-radius: 10px !important;
+    }}
+
+    /* 按鈕樣式 */
     div.stButton > button {{
         width: 100% !important;
         background-color: {COLOR_MAIN} !important;
         color: white !important;
         border: none !important;
         border-radius: 12px !important;
-        padding: 18px !important;
+        padding: 15px !important;
         font-size: 22px !important;
         font-weight: bold !important;
+        transition: 0.3s;
     }}
+    
+    /* 測驗選項按鈕 */
     .quiz-btn button {{
         background-color: white !important;
         color: #333 !important;
         border: 2px solid #F3F4F6 !important;
         text-align: left !important;
+        margin-bottom: 10px !important;
     }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. 資料讀取 ---
+# --- 2. 核心功能 ---
 @st.cache_data
 def load_and_shuffle_data():
     df_list = []
@@ -111,36 +136,39 @@ def load_and_shuffle_data():
         })
     return questions
 
-# --- 3. 測驗流程 ---
 if 'step' not in st.session_state:
     st.session_state.step = 'start'
 
 # A. 首頁
 if st.session_state.step == 'start':
-    st.markdown('<div class="main-card">', unsafe_allow_html=True)
-    st.markdown(f'<div class="app-title">{APP_TITLE}</div>', unsafe_allow_html=True)
-    # 此處已移除副標題的呼叫
-    st.markdown(f'<div class="intro-box">{INTRO_BOX_TEXT}</div>', unsafe_allow_html=True)
-    st.markdown('<div class="input-label">請輸入姓名：</div>', unsafe_allow_html=True)
+    # 這裡將大標題包進 main-card 裡面，確保紫色邊條在最上方
+    st.markdown(f"""
+    <div class="main-card">
+        <div class="app-title">{APP_TITLE}</div>
+        <div class="intro-box">{INTRO_BOX_TEXT}</div>
+        <div class="input-label">請輸入姓名：</div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    user_name = st.text_input("user_name_input", label_visibility="collapsed", placeholder="請輸入姓名")
-    
-    st.write("##")
-    if st.button("進入挑戰"):
-        if user_name.strip() == "":
-            st.error("請輸入姓名後再開始唷！")
-        else:
-            st.session_state.user_name = user_name
-            st.session_state.all_pool = load_and_shuffle_data()
-            if not st.session_state.all_pool:
-                st.error("找不到題庫檔案 (CSV)")
+    # 由於 Streamlit 渲染機制，input 與 button 需放在 markdown 外，利用寬度對齊
+    col1, col2, col3 = st.columns([1, 4, 1])
+    with col2:
+        user_name = st.text_input("user_name_input", label_visibility="collapsed", placeholder="請輸入姓名")
+        st.write("##")
+        if st.button("進入挑戰"):
+            if user_name.strip() == "":
+                st.error("請輸入姓名後再開始唷！")
             else:
-                st.session_state.quiz_data = random.sample(st.session_state.all_pool, min(len(st.session_state.all_pool), 10))
-                st.session_state.current_idx = 0
-                st.session_state.results = []
-                st.session_state.step = 'quiz'
-                st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+                st.session_state.user_name = user_name
+                st.session_state.all_pool = load_and_shuffle_data()
+                if not st.session_state.all_pool:
+                    st.error("找不到題庫檔案 (CSV)")
+                else:
+                    st.session_state.quiz_data = random.sample(st.session_state.all_pool, min(len(st.session_state.all_pool), 10))
+                    st.session_state.current_idx = 0
+                    st.session_state.results = []
+                    st.session_state.step = 'quiz'
+                    st.rerun()
 
 # B. 測驗頁
 elif st.session_state.step == 'quiz':
@@ -180,7 +208,6 @@ elif st.session_state.step == 'result':
             wrong_txt += f"Q{i+1}: {item['question']}\\n   ❌ 您選: {item['user_choice']}\\n   ✅ 正確: {item['correct_answer']}\\n\\n"
     
     level_tag = st.session_state.quiz_data[0]['level_info']
-    # 複製成績單標題改用大標題
     report_text = f"【{APP_TITLE}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
 
     html_code = f"""
