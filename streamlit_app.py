@@ -30,7 +30,7 @@ st.markdown(f"""
     .stApp {{ background-color: {COLOR_BG}; }}
     header {{visibility: hidden;}}
     
-    /* 大卡片容器 - 包含標題在內 */
+    /* 大卡片容器 */
     .main-card {{
         background-color: white;
         padding: 40px;
@@ -43,7 +43,6 @@ st.markdown(f"""
         margin-right: auto;
     }}
     
-    /* 標題置於卡片內 */
     .app-title {{
         color: {COLOR_MAIN};
         text-align: center;
@@ -52,7 +51,6 @@ st.markdown(f"""
         margin-bottom: 30px;
     }}
     
-    /* 說明小框 */
     .intro-box {{
         background-color: {COLOR_LIGHT};
         padding: 25px;
@@ -63,21 +61,16 @@ st.markdown(f"""
         margin-bottom: 30px;
         white-space: pre-wrap;
     }}
-    
-    .input-label {{ 
-        font-weight: bold; 
-        font-size: 18px; 
-        color: #374151; 
-        margin-bottom: 12px; 
-    }}
-    
-    /* 輸入框外觀微調 */
+
+    /* 輸入框外觀 (內嵌於卡片) */
     .stTextInput > div > div > input {{
         background-color: #F9FAFB !important;
         border-radius: 10px !important;
+        padding: 12px !important;
+        font-size: 16px !important;
     }}
 
-    /* 按鈕樣式 */
+    /* 按鈕樣式 (內嵌於卡片) */
     div.stButton > button {{
         width: 100% !important;
         background-color: {COLOR_MAIN} !important;
@@ -88,6 +81,7 @@ st.markdown(f"""
         font-size: 22px !important;
         font-weight: bold !important;
         transition: 0.3s;
+        margin-top: 10px;
     }}
     
     /* 測驗選項按鈕 */
@@ -96,7 +90,6 @@ st.markdown(f"""
         color: #333 !important;
         border: 2px solid #F3F4F6 !important;
         text-align: left !important;
-        margin-bottom: 10px !important;
     }}
     </style>
 """, unsafe_allow_html=True)
@@ -141,20 +134,17 @@ if 'step' not in st.session_state:
 
 # A. 首頁
 if st.session_state.step == 'start':
-    # 這裡將大標題包進 main-card 裡面，確保紫色邊條在最上方
-    st.markdown(f"""
-    <div class="main-card">
-        <div class="app-title">{APP_TITLE}</div>
-        <div class="intro-box">{INTRO_BOX_TEXT}</div>
-        <div class="input-label">請輸入姓名：</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # 由於 Streamlit 渲染機制，input 與 button 需放在 markdown 外，利用寬度對齊
-    col1, col2, col3 = st.columns([1, 4, 1])
-    with col2:
+    # 利用一個整體的 div 將所有元件包在白色卡片內
+    with st.container():
+        st.markdown(f"""
+        <div class="main-card">
+            <div class="app-title">{APP_TITLE}</div>
+            <div class="intro-box">{INTRO_BOX_TEXT}</div>
+        """, unsafe_allow_html=True)
+        
+        # 將輸入框與按鈕放在這裡，它們會被包含在 main-card 的 CSS 範圍內
         user_name = st.text_input("user_name_input", label_visibility="collapsed", placeholder="請輸入姓名")
-        st.write("##")
+        
         if st.button("進入挑戰"):
             if user_name.strip() == "":
                 st.error("請輸入姓名後再開始唷！")
@@ -169,6 +159,8 @@ if st.session_state.step == 'start':
                     st.session_state.results = []
                     st.session_state.step = 'quiz'
                     st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # B. 測驗頁
 elif st.session_state.step == 'quiz':
