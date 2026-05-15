@@ -1,0 +1,51 @@
+id,question,A,B,C,Answerkey
+101,How many books are there on the desk?,There are twelve books.,There is twelve books.,It's on the desk.,A
+102,How many markers do you have?,I have fifteen markers.,I am fifteen.,"Yes, I have.",A
+103,How many students are in the classroom?,There are twenty-one students.,There is a student.,They are students.,A
+104,How many rulers does she have?,She has three rulers.,She have three rulers.,He has three rulers.,A
+105,How many apples are there in the bag?,There is only one apple.,There are one apple.,They are red.,A
+106,How many boxes do those students need?,They need fifty boxes.,They are boxes.,"Yes, they do.",A
+107,How many cats are under the table?,There are two cats.,It's a cat.,They are under the table.,A
+108,How many erasers does Terry want?,He wants eleven erasers.,He want eleven erasers.,"Yes, he does.",A
+109,How many pencils are in your pencil case?,There are eight pencils.,It's eight pencils.,I'm eight.,A
+110,How many toy cars does he have?,He has thirty-five toy cars.,He is thirty-five.,"Yes, he has.",A
+111,Does your sister like oranges?,"Yes, she does. She likes oranges.","Yes, she is.","No, she don't.",A
+112,Do you want some milk for breakfast?,"Yes, please. I'm thirsty.","Yes, I am.","No, I'm not.",A
+113,Does Roy have a blue kite?,"No, he doesn't.","No, he isn't.","Yes, he do.",A
+114,Do those children like watermelons?,"Yes, they do. They love them.","Yes, they are.","No, they don't like.",A
+115,Does Felicia want some rice?,"No, she doesn't. She's full.","No, she isn't.","Yes, she want.",A
+116,Do you and your brother have a dog?,"Yes, we do.","Yes, we are.","No, I don't.",A
+117,Does he play basketball every day?,"Yes, he does.","Yes, he is.","No, he isn't.",A
+118,Do you like this sunny weather?,"Yes, I do. It's beautiful.","Yes, I am.","No, it doesn't.",A
+119,Does she want some moon cakes?,"No, she doesn¡¦t want moon cakes.","Yes, she is.","No, she don't.",A
+120,Do we have any grapes in the kitchen?,"No, we don't.","No, we aren't.","Yes, we are.",A
+121,Whose book is this?,It's my book.,They're my books.,This are my book.,A
+122,Whose pencils are those on the floor?,They're Rita's pencils.,It's Rita's pencil.,Those is Rita's pencils.,A
+123,Whose bag is that under the desk?,It's his bag.,They're his bags.,That are his bag.,A
+124,Whose rulers are these?,They're our rulers.,It's our ruler.,These is our rulers.,A
+125,Whose marker is it?,It's Terry's marker.,They're Terry's markers.,It's a marker.,A
+126,Whose caps are these?,They're my father's caps.,It's my father's cap.,This is my father's caps.,A
+127,Whose cat is that in the yard?,It's her cat.,They're her cats.,That are her cat.,A
+128,Whose balls are those?,They're their balls.,It's their ball.,Those is their balls.,A
+129,Whose eraser is this?,It's your eraser.,They're your erasers.,This are your eraser.,A
+130,Whose umbrellas are those?,They're my friends' umbrellas.,It's my friend's umbrella.,Those is my friends' umbrellas.,A
+131,Whose chair is that?,It's the teacher's chair.,They're the teacher's chairs.,That are the teacher's chair.,A
+132,Whose watermelons are these?,They're Grandma's watermelons.,It's Grandma's watermelon.,This is Grandma's watermelon.,A
+133,Whose big box is this?,It's my box.,They're my boxes.,This are my box.,A
+134,Whose toys are those in the room?,They're my brother's toys.,It's my brother's toy.,Those is my brother's toys.,A
+135,Whose notebook is that?,It's Lian's notebook.,They're Lian's notebooks.,That are Lian's notebook.,A
+136,I see many books and a librarian here. Where are we?,We're in the library.,We're at the supermarket.,We're in the park.,A
+137,Look! There's a lot of fresh fruit and bread here. Where is Felicia?,She's at the supermarket.,She's in the bedroom.,She's at the library.,A
+138,I want to buy some pens and a new notebook. Where should I go?,Go to the bookstore.,Go to the dining room.,Go to the yard.,A
+139,My mom is buying eggs and milk for dinner. Where is she?,She's at the supermarket.,She's in the bathroom.,She's at school.,A
+140,There are many students and a teacher in this room. Where are they?,They're in the classroom.,They're at the park.,They're in the yard.,A
+141,I see a lot of flowers and trees. The children are playing. Where are they?,They're in the park.,They're at the bookstore.,They're in the kitchen.,A
+142,We are hungry. Let's buy some food and drinks here. Where are we?,We're at the supermarket.,We're in the library.,We're in the bathroom.,A
+143,I want to read a storybook. It is very quiet here. Where am I?,You're in the library.,You're at the park.,You're in the kitchen.,A
+144,Look at the doctor and the sick boy. Where are they?,They're at the hospital.,They're at the bookstore.,They're in the yard.,A
+145,I'm buying a birthday gift for my sister. Where am I?,You're in a gift shop.,You're in the bedroom.,You're at the hospital.,A
+146,There is a big stove and many plates. My dad is cooking. Where is he?,He's in the kitchen.,He's in the bedroom.,He's at the library.,A
+147,I see a bed and a lamp. It's time to sleep. Where are you?,I'm in the bedroom.,I'm in the living room.,I'm at the supermarket.,A
+148,There is a sofa and a TV. My family is sitting here. Where are we?,We're in the living room.,We're in the bathroom.,We're at the bookstore.,A
+149,I see a lot of water and people are swimming. Where are they?,They're at the swimming pool.,They're in the library.,They're at the supermarket.,A
+150,There are many desks and chairs. I'm writing a test. Where am I?,You're in the classroom.,You're at the park.,You're in the kitchen.,A
