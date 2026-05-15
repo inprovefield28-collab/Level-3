@@ -7,8 +7,9 @@ import random
 # ==========================================
 # 老師修改區
 # ==========================================
-APP_TITLE = "線上聽力測驗 Level 3"
-INTRO_BOX_TEXT = """• 小學四年級單字、句型"""
+APP_TITLE = "線上聽力測驗 Level 1"
+INTRO_BOX_TEXT = """• 小學二年級單字、句型
+• 自然發音 Level 1：a~z的辨認"""
 
 COLOR_MAIN = "#8B5CF6"   # 主色
 COLOR_LIGHT = "#F5F3FF"  # 說明框背景
@@ -22,13 +23,7 @@ st.markdown(f"""
     <style>
     .stApp {{ background-color: {COLOR_BG}; }}
     header {{ visibility: hidden; }}
-    
-    /* 縮減網頁最上方留白 */
-    .block-container {{
-        padding-top: 1rem !important;
-    }}
-
-    /* 大卡片容器 (針對 st.form) */
+    .block-container {{ padding-top: 1rem !important; }}
     [data-testid="stForm"] {{
         background-color: white !important;
         padding: 30px 40px !important;
@@ -39,19 +34,17 @@ st.markdown(f"""
         max-width: 600px;
         margin: 0px auto;
     }}
-    
     .app-title {{
         color: {COLOR_MAIN};
         font-weight: 800;
         font-size: 32px;
-        margin-top: -10px; /* 標題上移 */
+        margin-top: -10px;
         margin-bottom: 10px;
         text-align: center;
     }}
-    
     .intro-box {{
         background-color: {COLOR_LIGHT};
-        padding: 12px 25px !important; /* 縮減說明框內部的上下距離 */
+        padding: 12px 25px !important;
         border-radius: 12px;
         color: {COLOR_MAIN};
         font-size: 15px;
@@ -60,36 +53,8 @@ st.markdown(f"""
         white-space: pre-wrap;
         text-align: left;
     }}
-
-    .stTextInput input {{
-        background-color: #F9FAFB !important;
-        border: 1px solid #E5E7EB !important;
-        border-radius: 10px !important;
-    }}
-
-    /* 進入挑戰按鈕置中 */
-    [data-testid="stFormSubmitButton"] {{
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }}
-
-    [data-testid="stFormSubmitButton"] button {{
-        width: auto !important;
-        min-width: 150px !important;
-        background-color: {COLOR_MAIN} !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 12px !important;
-        padding: 10px 40px !important;
-        font-size: 18px !important;
-        font-weight: bold !important;
-        margin-top: 10px !important;
-    }}
-
-    /* 測驗選項按鈕 */
     .quiz-btn button {{
-width: 100% !important;
+        width: 100% !important;
         background-color: white !important;
         color: #333 !important;
         border: 2px solid #F3F4F6 !important;
@@ -97,139 +62,229 @@ width: 100% !important;
         border-radius: 12px !important;
         padding: 15px !important;
         margin-bottom: 10px !important;
-        font-size: 26px !important; /* 直接加入這一行，數字可改 22-26 */
+        font-size: 26px !important;
     }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. 核心功能 ---
+# --- 2. 核心功能：讀取並整合所有題庫 ---
 @st.cache_data
-def load_and_shuffle_data():
+def load_all_questions():
     df_list = []
-    file_pattern = re.compile(r"([a-zA-Z0-9]+)(\d+-\d+)\.csv$")
+    # 匹配模式：Main1-50.csv 或 Phonics51-100.csv
+    file_pattern = re.compile(r"([a-zA-Z]+)(\d+-\d+)\.csv$")
+    
+    # 獲取當前目錄下所有檔案
     all_files = [f for f in os.listdir('.') if os.path.isfile(f)]
+    
     for file_name in all_files:
         match = file_pattern.match(file_name)
         if match:
             cat, rng = match.group(1), match.group(2)
             try:
+                # 優先嘗試 utf-8，不行則用 big5 (針對 Excel 存出的 CSV)
                 temp_df = pd.read_csv(file_name, encoding='utf-8-sig')
             except:
                 temp_df = pd.read_csv(file_name, encoding='big5')
+            
+            # 統一欄位名稱為小寫並去除空格
             temp_df.columns = [c.strip().lower() for c in temp_df.columns]
-            temp_df['cat'], temp_df['rng'] = cat, rng
+            # 標註來源分類與範圍
+            temp_df['cat_folder'] = f"{cat}{rng}" 
             df_list.append(temp_df)
     
-    if not df_list: return []
+    if not df_list:
+        return []
+    
+    # 合併所有讀取到的 CSV
     full_df = pd.concat(df_list, ignore_index=True)
-    questions = []
+    all_questions = []
+    
     for q in full_df.to_dict('records'):
+        # 處理 ID 補零，確保 1 變成 001
+        raw_id = str(q.get('id', '0')).split('.')[0]
+        clean_id = raw_id.zfill(3)
+        
+        # 建立選項清單並打亂
         opts = [str(q.get('a','')), str(q.get('b','')), str(q.get('c',''))]
-        correct_text = opts[0]
+        correct_text = opts[0] # 假設 A 永遠是正確答案
         random.shuffle(opts)
-        questions.append({
-            'id': str(q.get('id', 0)).zfill(3),
-            'q': q.get('question', ''), # 資料仍保留供結果頁面使用
+        
+        # 音檔路徑：資料夾名稱 / q_編號.mp3
+        folder = q['cat_folder']
+        audio_path = os.path.join(folder, f"q_{clean_id}.mp3")
+        
+        all_questions.append({
+            'id': clean_id,
+            'q_text': q.get('question', ''),
             'opts': opts,
-            'ans': opts.index(correct_text),
-            'path': f"audio_{q['cat']}{q['rng']}/q_{str(q.get('id', 0)).zfill(3)}.mp3",
-            'level_info': f"{q['cat']}{q['rng']}"
+            'ans_idx': opts.index(correct_text),
+            'path': audio_path,
+            'source': folder
         })
-    return questions
+    return all_questions
 
+# --- 3. 狀態管理與介面 ---
 if 'step' not in st.session_state:
     st.session_state.step = 'start'
 
-# A. 首頁
+# A. 啟動頁面
 if st.session_state.step == 'start':
     with st.form("start_form"):
         st.markdown(f'<div class="app-title">{APP_TITLE}</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="intro-box">{INTRO_BOX_TEXT}</div>', unsafe_allow_html=True)
-        user_name = st.text_input("user_name", label_visibility="collapsed", placeholder="請輸入姓名")
+        user_name = st.text_input("姓名", label_visibility="collapsed", placeholder="請輸入姓名")
         submit = st.form_submit_button("進入挑戰")
+        
         if submit:
-            if user_name.strip() == "":
+            if not user_name.strip():
                 st.error("請輸入姓名後再開始唷！")
             else:
                 st.session_state.user_name = user_name
-                st.session_state.all_pool = load_and_shuffle_data()
+                # 讀取「所有」檔案並放入池中
+                st.session_state.all_pool = load_all_questions()
+                
                 if not st.session_state.all_pool:
-                    st.error("找不到題庫檔案 (CSV)")
+                    st.error("找不到 CSV 題庫，請確認檔案命名是否正確。")
                 else:
-                    st.session_state.quiz_data = random.sample(st.session_state.all_pool, min(len(st.session_state.all_pool), 10))
+                    # 從總題庫（例如 200 題）中隨機抽取 10 題
+                    num_to_pick = min(len(st.session_state.all_pool), 10)
+                    st.session_state.quiz_data = random.sample(st.session_state.all_pool, num_to_pick)
+                    
                     st.session_state.current_idx = 0
                     st.session_state.results = []
                     st.session_state.step = 'quiz'
                     st.rerun()
 
-# B. 測驗頁 (已刪除題目文字顯示)
+# B. 測驗執行頁
 elif st.session_state.step == 'quiz':
     q = st.session_state.quiz_data[st.session_state.current_idx]
     st.markdown(f"### 第 {st.session_state.current_idx + 1} / 10 題")
     
+    # 音檔播放
     if os.path.exists(q['path']):
         st.audio(q['path'])
     else:
-        st.warning(f"找不到音檔: {q['path']}")
-    
-    # 此處已刪除 st.write(f"#### {q['q']}")
+        st.warning(f"找不到音檔：{q['path']}")
     
     st.markdown('<div class="quiz-btn">', unsafe_allow_html=True)
-    keys = ['A', 'B', 'C']
+    labels = ['A', 'B', 'C']
     for i, opt_text in enumerate(q['opts']):
-        if st.button(f"{keys[i]}. {opt_text}", key=f"q_{st.session_state.current_idx}_{i}"):
+        if st.button(f"{labels[i]}. {opt_text}", key=f"btn_{st.session_state.current_idx}_{i}"):
+            # 記錄結果
             st.session_state.results.append({
-                "question": q['q'],
+                "question": q['q_text'],
                 "user_choice": opt_text,
-                "correct_answer": q['opts'][q['ans']],
-                "is_correct": (i == q['ans'])
+                "correct_answer": q['opts'][q['ans_idx']],
+                "is_correct": (i == q['ans_idx'])
             })
+            # 進入下一題
             st.session_state.current_idx += 1
-            if st.session_state.current_idx >= 10:
+            if st.session_state.current_idx >= len(st.session_state.quiz_data):
                 st.session_state.step = 'result'
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-# C. 結果頁
+# --- 3. 狀態管理與介面 ---
+# ... (中間 quiz 的部分不變) ...
+
+# C. 結果顯示頁 (重新加入並優化複製功能)
 elif st.session_state.step == 'result':
+    # 大卡片容器
     st.markdown(f"""
     <div style="background-color: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 10px solid {COLOR_MAIN}; max-width: 600px; margin: 20px auto;">
-        <h2 style='text-align:center;'>🏆 練習結束！</h2>
+        <h2 style='text-align:center;'>🏆 挑戰完成！</h2>
     """, unsafe_allow_html=True)
     
-    score = sum(1 for item in st.session_state.results if item['is_correct'])
-    final_score = score * 10
-    st.markdown(f"<h3 style='text-align:center; color:{COLOR_MAIN};'>得分：{final_score} 分</h3>", unsafe_allow_html=True)
+    score_count = sum(1 for item in st.session_state.results if item['is_correct'])
+    total_count = len(st.session_state.results)
+    final_score = score_count * 10
+    
+    st.markdown(f"<h3 style='text-align:center; color:{COLOR_MAIN};'>{st.session_state.user_name} 的得分：{final_score} 分</h3>", unsafe_allow_html=True)
 
+    # --- 建立複製用的文字報告 ---
     wrong_txt = ""
     for i, item in enumerate(st.session_state.results):
         if not item['is_correct']:
-            wrong_txt += f"Q{i+1}: {item['question']}\\n   ❌ 您選: {item['user_choice']}\\n   ✅ 正確: {item['correct_answer']}\\n\\n"
+            # 從 source 判斷是 Main 還是 Phonics
+            source_info = item.get('source', '未知範圍')
+            wrong_txt += f"Q{i+1} ({source_info}): {item['question']}\\n   ❌ 您選: {item['user_choice']}\\n   ✅ 正確: {item['correct_answer']}\\n\\n"
     
-    level_tag = st.session_state.quiz_data[0]['level_info']
-    report_text = f"【{APP_TITLE}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score}\\n\\n{wrong_txt}"
+    # 如果全對
+    if not wrong_txt:
+        wrong_txt = "🎉 太棒了！全對！"
 
-    html_code = f"""
-        <button id="copyBtn" style="background-color:{COLOR_MAIN}; color:white; border:none; padding:15px; font-size:20px; font-weight:bold; border-radius:15px; width:100%; cursor:pointer;">
+    # 組裝完整的報告內容
+    report_text = f"【{APP_TITLE}】\\n姓名：{st.session_state.user_name}\\n成績：{final_score} 分\\n\\n--- 錯題記錄 ---\\n{wrong_txt}"
+
+    # --- JavaScript 一鍵複製按鈕 ---
+    html_copy_button = f"""
+        <button id="copyBtn" style="background-color:{COLOR_MAIN}; color:white; border:none; padding:15px; font-size:20px; font-weight:bold; border-radius:15px; width:100%; cursor:pointer; margin-top: 20px; transition: background 0.3s;">
             按我複製成績給老師
         </button>
         <script>
             document.getElementById('copyBtn').onclick = function() {{
                 const text = "{report_text}";
-                navigator.clipboard.writeText(text.replace(/\\\\n/g, '\\n')).then(function() {{
-                    document.getElementById('copyBtn').innerText = '✅ 複製成功！';
-                    setTimeout(function() {{ document.getElementById('copyBtn').innerText = '按我複製成績給老師'; }}, 2000);
-                }});
+                // 處理換行符號
+                const cleanText = text.replace(/\\\\n/g, '\\n');
+                
+                if (navigator.clipboard && navigator.clipboard.writeText) {{
+                    navigator.clipboard.writeText(cleanText).then(function() {{
+                        document.getElementById('copyBtn').innerText = '✅ 複製成功！';
+                        document.getElementById('copyBtn').style.backgroundColor = '#10B981'; // 變綠色
+                        setTimeout(function() {{ 
+                            document.getElementById('copyBtn').innerText = '按我複製成績給老師'; 
+                            document.getElementById('copyBtn').style.backgroundColor = '{COLOR_MAIN}';
+                        }}, 2000);
+                    }}).catch(function(err) {{
+                        // 失敗時的備案
+                        fallbackCopyTextToClipboard(cleanText);
+                    }});
+                }} else {{
+                    // 不支援此 API 時的備案
+                    fallbackCopyTextToClipboard(cleanText);
+                }}
             }};
+
+            function fallbackCopyTextToClipboard(text) {{
+                var textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";  //避免滾動
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {{
+                    document.execCommand('copy');
+                    document.getElementById('copyBtn').innerText = '✅ 複製成功 (備案)！';
+                    setTimeout(function() {{ document.getElementById('copyBtn').innerText = '按我複製成績給老師'; }}, 2000);
+                }} catch (err) {{
+                    document.getElementById('copyBtn').innerText = '❌ 複製失敗，請手動截圖';
+                    console.error('Fallback: Oops, unable to copy', err);
+                }}
+                document.body.removeChild(textArea);
+            }}
         </script>
     """
-    st.components.v1.html(html_code, height=100)
+    
+    # 插入複製按鈕
+    st.components.v1.html(html_copy_button, height=100)
+    
     st.write("---")
+    
+    # 在頁面上也顯示錯題 (供同學現場訂正)
+    has_wrong = False
     for i, item in enumerate(st.session_state.results):
         if not item['is_correct']:
+            has_wrong = True
             st.error(f"**Q{i+1}: {item['question']}**\n\n❌ 您選: {item['user_choice']}  \n✅ 正確: {item['correct_answer']}")
+            
+    if not has_wrong:
+        st.balloons()
+        st.success("太厲害了！全部答對！")
 
-    if st.button("再玩一次"):
+    # 再玩一次按鈕
+    if st.button("再玩一次 (重新隨機抽題)", key="restart_btn"):
         st.session_state.step = 'start'
         st.rerun()
+        
     st.markdown('</div>', unsafe_allow_html=True)
