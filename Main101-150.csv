@@ -1,7 +1,7 @@
 id,question,A,B,C,Answerkey
 101,How many books are there on the desk?,There are twelve books.,There is twelve books.,It's on the desk.,A
 102,How many markers do you have?,I have fifteen markers.,I am fifteen.,"Yes, I have.",A
-103,How many students are in the classroom?,There are twenty-one students.,There is a student.,They are students.,A
+103,How many students are there in the classroom?,There are twenty-one students.,Yes, there is one student.,They are students.,A
 104,How many rulers does she have?,She has three rulers.,She have three rulers.,He has three rulers.,A
 105,How many apples are there in the bag?,There is only one apple.,There are one apple.,They are red.,A
 106,How many boxes do those students need?,They need fifty boxes.,They are boxes.,"Yes, they do.",A
@@ -17,7 +17,7 @@ id,question,A,B,C,Answerkey
 116,Do you and your brother have a dog?,"Yes, we do.","Yes, we are.","No, I don't.",A
 117,Does he play basketball every day?,"Yes, he does.","Yes, he is.","No, he isn't.",A
 118,Do you like this sunny weather?,"Yes, I do. It's beautiful.","Yes, I am.","No, it doesn't.",A
-119,Does she want some moon cakes?,"No, she doesn¡¦t want moon cakes.","Yes, she is.","No, she don't.",A
+119,Does she want some moon cakes?,"No, she doesnÂ¡Â¦t want moon cakes.","Yes, she is.","No, she don't.",A
 120,Do we have any grapes in the kitchen?,"No, we don't.","No, we aren't.","Yes, we are.",A
 121,Whose book is this?,It's my book.,They're my books.,This are my book.,A
 122,Whose pencils are those on the floor?,They're Rita's pencils.,It's Rita's pencil.,Those is Rita's pencils.,A
