@@ -9,7 +9,7 @@ import random
 # ==========================================
 APP_TITLE = "線上聽力測驗 Level 3"
 INTRO_BOX_TEXT = """• 小學三年級單字、句型
-• 自然發音 Level 2：長母音：a_e, ai, ay, ea, ee, i_e, ie, igh, oa, o_e, ue, u_e, ui, -y"""
+• 自然發音 Level 2：長母音的辨認"""
 
 COLOR_MAIN = "#8B5CF6"   # 主色
 COLOR_LIGHT = "#F5F3FF"  # 說明框背景
